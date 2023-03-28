@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	handlers "devstreamline/handlers"
+	"devstreamline/handlers"
 
 	"github.com/gorilla/mux"
 )
