@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
+	handlers "devstreamline/handlers"
+
 	"github.com/gorilla/mux"
 )
 
@@ -21,7 +23,8 @@ func main() {
 		http.ServeFile(w, r, "index.html")
 	}).Methods("GET")
 
-	router.HandleFunc("/convert", handleConvertRequest).Methods("GET")
+	router.HandleFunc("/retrieve", handlers.HandleRetrieveRequest).Methods("GET")
+	router.HandleFunc("/convert", handlers.HandleConvertRequest).Methods("GET")
 
 	err := http.ListenAndServe(":"+strconv.Itoa(PORT), router)
 	if err != nil {
