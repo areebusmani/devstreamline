@@ -20,10 +20,9 @@ func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "index.html")
+		http.ServeFile(w, r, "templates/index.html")
 	}).Methods("GET")
 
-	router.HandleFunc("/retrieve", handlers.HandleRetrieveRequest).Methods("GET")
 	router.HandleFunc("/convert", handlers.HandleConvertRequest).Methods("GET")
 
 	err := http.ListenAndServe(":"+strconv.Itoa(PORT), router)

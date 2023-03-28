@@ -8,11 +8,6 @@ import (
 )
 
 func HandleConvertRequest(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusInternalServerError)
-	return
-}
-
-func HandleRetrieveRequest(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.Query().Get("file")
 	re, err := regexp.Compile(`https?://www\.figma\.com/file/([^/]+)/([^/]+)`)
 	if err != nil {
