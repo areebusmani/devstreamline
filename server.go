@@ -25,6 +25,8 @@ func main() {
 
 	router.HandleFunc("/convert", handlers.HandleConvertRequest).Methods("GET")
 
+	router.HandleFunc("/json", handlers.HandleJsonRequest).Methods("GET")
+
 	err := http.ListenAndServe(":"+strconv.Itoa(PORT), router)
 	if err != nil {
 		log.Fatal(err)
