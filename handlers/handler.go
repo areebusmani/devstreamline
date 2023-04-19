@@ -1,20 +1,24 @@
 package handlers
 
 import (
+	"devstreamline/converter"
 	"devstreamline/figma"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"net/http"
 	"regexp"
 )
 
-func HandleConvertRequest(w http.ResponseWriter, r *http.Request) {
-	url := r.URL.Query().Get("file")
+// Handles request /convert?file=<figma_url> by fetching the figma file and
+// converting it into frontend code.
+func HandleConvertRequest(writer http.ResponseWriter, request *http.Request) {
+	url := request.URL.Query().Get("file")
 	re, err := regexp.Compile(`https?://www\.figma\.com/file/([^/]+)/([^/]+)`)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	matches := re.FindStringSubmatch(url)
@@ -22,18 +26,54 @@ func HandleConvertRequest(w http.ResponseWriter, r *http.Request) {
 	if len(matches) > 2 {
 		key = matches[1]
 	} else {
-		w.WriteHeader(http.StatusBadRequest)
+		writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	file, err := fetchFigmaFile(key)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	// TODO: Remove hard coded figma node id.
+	converter.Convert(file.GetNode("1:1652"))
+
+	type ConvertTemplateData struct {
+		Markup string
+	}
+
+	convertTemplate, _ := template.ParseFiles("./templates/convert.html")
+	convertTemplateData := ConvertTemplateData{Markup: "Hello world"}
+
+	convertTemplate.Execute(writer, convertTemplateData)
+}
+
+// Handles request /json?file=<figma_url> by fetching the figma file
+// represented as json.
+func HandleJsonRequest(writer http.ResponseWriter, request *http.Request) {
+	url := request.URL.Query().Get("file")
+	re, err := regexp.Compile(`https?://www\.figma\.com/file/([^/]+)/([^/]+)`)
+	if err != nil {
+		writer.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	matches := re.FindStringSubmatch(url)
+	var key string
+	if len(matches) > 2 {
+		key = matches[1]
+	} else {
+		writer.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	file, err := fetchFigmaFile(key)
+	if err != nil {
+		writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	resp, _ := json.Marshal(file)
-	w.Write([]byte(resp))
+	writer.Write([]byte(resp))
 }
 
+// Fetches the figma file from the figma server.
 func fetchFigmaFile(key string) (file figma.File, err error) {
 	file = figma.File{}
 

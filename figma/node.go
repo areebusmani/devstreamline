@@ -120,3 +120,21 @@ type Node struct {
 	// ID of component that this instance came from, refers to components table.
 	ComponentID string
 }
+
+// Finds and returns a node by id from a figma file.
+func (file File) GetNode(nodeId string) (node *Node) {
+	queue := []*Node{}
+	queue = append(queue, &file.Document)
+	for len(queue) > 0 {
+		currentNode := queue[0]
+		queue = queue[1:]
+		if currentNode.ID == nodeId {
+			node = currentNode
+			return
+		}
+		for _, childNode := range currentNode.Children {
+			queue = append(queue, &childNode)
+		}
+	}
+	return
+}
